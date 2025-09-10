@@ -4,6 +4,8 @@ import com.backend.estudiantes.dto.LoginRequest;
 import com.backend.estudiantes.model.Usuario;
 import com.backend.estudiantes.service.AuthService;
 import com.backend.estudiantes.service.JwtService;
+import com.backend.estudiantes.utils.AuthReponseBuilder;
+import com.backend.estudiantes.utils.ErrorReponseBuilder;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -41,19 +43,10 @@ public class AuthController {
 
             String jwtToken = jwtService.generateToken(extraClaims, usuario);
 
-            return ResponseEntity.ok(Map.of(
-                    "message", "Login exitoso",
-                    "expiresIn", jwtService.getJwtExpirationMs(),
-                    "token", jwtToken,
-                    "data", Map.of(
-                            "email", usuario.getEmail(),
-                            "rol", usuario.getRol()
-                    )
-            ));
+          return ResponseEntity.ok(AuthReponseBuilder.buildAuthResponse(jwtToken, usuario));
         }catch (Exception e){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
-                    "Error", "Credenciales incorrectas"
-            ));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ErrorReponseBuilder.buildErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED));
 
         }
 
